@@ -40,7 +40,7 @@ import { createServerRouter } from "@cita-services/tbrpc/server";
 import { WebSocketServer } from "ws";
 
 // Import route definitions from the client
-import { type IFrameClientOptions } from "../../../../seat-picker-iframe/src/modules/seatPicker/ws";
+import { type IFrameClientOptions } from "..<ClientProject>";
 
 // Create a websocket server
 const wss = new WebSocketServer({ port: 8080 });
