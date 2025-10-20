@@ -48,7 +48,8 @@ const wss = new WebSocketServer({ port: 8080 });
 // Create the router with server side routes
 const router = createServerRouter<IFrameClientOptions>()(wss, {
   routes: {
-    // Each route is provided with a context argument which has 
+    // Each route is provided with a context argument which provides the route with information regarding the context of the call
+    // for example the websocket this call is coming from and the client that is reperesenting this websocket
     serverPing: (context, name: string) => {
       return `Pong: ${name}`;
     },
