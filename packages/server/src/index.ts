@@ -1,14 +1,19 @@
 import { baseRouter, baseRouteCaller, type RouterOptions } from "@tbrpc/base";
 import { type WebSocketServer, WebSocket } from "ws";
 
-// type Tail<T extends any[]> = T extends [any, ...infer R] ? R : never;
-type Tail2<T extends any[]> = T extends [any, any, ...infer R] ? R : never;
+type Tail<T extends any[]> = T extends [any, ...infer R] ? R : never;
 
 export type ServerRouterOptions<ClientOptions extends RouterOptions> = {
   routes: {
     [key: string]: (
-      ws: WebSocket,
-      clientRouteCaller: ReturnType<typeof baseRouteCaller<ClientOptions>>,
+      context: {
+        ws: WebSocket;
+        client: ReturnType<typeof baseRouteCaller<ClientOptions>>;
+        clients: Map<
+          WebSocket,
+          ReturnType<typeof baseRouteCaller<ClientOptions>>
+        >;
+      },
       ...args: any[]
     ) => any;
   };
@@ -74,8 +79,16 @@ function _serverRouter<
     const remappedRoutes = Object.fromEntries(
       Object.entries(options.routes).map(([key, func]) => [
         key,
-        (...args: Tail2<Parameters<typeof func>>) =>
-          func(ws, clientRouteCaller, ...args),
+        (...args: Tail<Parameters<typeof func>>) =>
+          func(
+            {
+              ws,
+              client: clientRouteCaller,
+              clients,
+            },
+            clientRouteCaller,
+            ...args
+          ),
       ])
     );
 
@@ -91,7 +104,7 @@ function _serverRouter<
 
   type ClientRoutes<Options extends ServerRouterOptions<ClientOptions>> = {
     [Key in keyof Options["routes"]]: (
-      ...args: Tail2<Parameters<Options["routes"][Key]>>
+      ...args: Tail<Parameters<Options["routes"][Key]>>
     ) => ReturnType<Options["routes"][Key]>;
   };
 
