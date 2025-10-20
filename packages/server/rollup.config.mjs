@@ -24,6 +24,13 @@ const bundles = [
 
 const bundleConfigs = [];
 
+// Get dependencies to mark them as external
+const external = [
+  ...Object.keys(pkg.dependencies || {}),
+  ...Object.keys(pkg.peerDependencies || {}),
+];
+
+
 bundles.forEach((bundle, index) => {
   bundleConfigs.push({
     input: bundle.input,
@@ -40,12 +47,12 @@ bundles.forEach((bundle, index) => {
         }),
       resolve(),
       typescript({
-        tsconfig: "./tsconfig.json",
+        tsconfig: "../../tsconfig.json",
         declaration: index == 0, // Only generate declarations once
         declarationDir: path.dirname(bundle.outputFile),
       }),
     ],
-    external: [],
+    external,
   });
 
   // Dotenv injection for each bundle
@@ -57,7 +64,7 @@ bundles.forEach((bundle, index) => {
     plugins: [
       dotenv()
     ],
-    external: [],
+    external,
   });
 });
 
@@ -77,7 +84,7 @@ const typesBundleConfig = {
       hook: "buildEnd",
     }),
   ],
-  external: [],
+  external,
 };
 
 export default [...bundleConfigs, typesBundleConfig];

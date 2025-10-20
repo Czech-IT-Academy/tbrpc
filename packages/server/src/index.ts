@@ -1,4 +1,4 @@
-import { baseRouter, baseRouteCaller, type RouterOptions } from "@tbrpc/base";
+import { baseRouter, baseRouteCaller, type RouterOptions } from "tbrpc-base";
 import { type WebSocketServer, WebSocket } from "ws";
 
 type Tail<T extends any[]> = T extends [any, ...infer R] ? R : never;

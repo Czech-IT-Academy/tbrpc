@@ -1,5 +1,6 @@
 {
-  "name": "@tbrpc/server",
+  "name": "@cita-services/tbrpc-server",
+  "private": false,
   "version": "0.0.1",
   "author": "honzakubita",
   "license": "ISC",
@@ -9,12 +10,17 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "rollup -c rollup.config.mjs",
-    "prepublishOnly": "yarn build"
+    "prepublishOnly": "bun run build"
   },
   "dependencies": {
-    "@tbrpc/base": "workspace:*",
+    "tbrpc-base": "workspace:*"
+  },
+  "peerDependencies": {
     "ws": "^8.18.3"
   },
   "devDependencies": {

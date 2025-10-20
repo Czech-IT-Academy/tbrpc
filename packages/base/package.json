@@ -1,5 +1,5 @@
 {
-  "name": "@tbrpc/base",
+  "name": "tbrpc-base",
   "private": true,
   "version": "0.0.1",
   "author": "honzakubita",
@@ -7,7 +7,7 @@
   "type": "module",
   "module": "./src/index.ts",
   "dependencies": {
-    "@tbrpc/types": "workspace:*"
+    "tbrpc-types": "workspace:*"
   },
   "exports": {
     ".": "./src/index.ts"

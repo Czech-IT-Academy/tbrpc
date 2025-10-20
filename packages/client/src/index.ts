@@ -1,4 +1,4 @@
-import { baseRouter, baseRouteCaller, type RouterOptions } from "@tbrpc/base";
+import { baseRouter, baseRouteCaller, type RouterOptions } from "tbrpc-base";
 
 function websocketSend(socket: WebSocket, data: string) {
   if (socket.readyState !== WebSocket.OPEN) {

@@ -1,4 +1,4 @@
-import type { WSMessage } from "@tbrpc/types";
+import type { WSMessage } from "tbrpc-types";
 import { uuid } from "./utils";
 
 export type RouterOptions = {

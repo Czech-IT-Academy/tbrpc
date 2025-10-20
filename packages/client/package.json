@@ -1,5 +1,6 @@
 {
-  "name": "@tbrpc/client",
+  "name": "@cita-services/tbrpc-client",
+  "private": false,
   "version": "0.0.1",
   "author": "honzakubita",
   "license": "ISC",
@@ -9,12 +10,15 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "rollup -c rollup.config.mjs",
-    "prepublishOnly": "yarn build"
+    "prepublishOnly": "bun run build"
   },
   "dependencies": {
-    "@tbrpc/base": "workspace:*"
+    "tbrpc-base": "workspace:*"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^16.0.1",

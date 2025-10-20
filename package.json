@@ -1,7 +1,12 @@
 {
-  "name": "tbrpc",
+  "name": "@cita-services/tbrpc",
   "private": true,
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "scripts": {
+    "buildClient": "bun run --cwd ./packages/client build",
+    "buildServer": "bun run --cwd ./packages/server build",
+    "build": "bun run buildClient && bun run buildServer"
+  }
 }
