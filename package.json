@@ -1,0 +1,7 @@
+{
+  "name": "tbrpc",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
+}

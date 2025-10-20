@@ -1,0 +1,12 @@
+{
+  "name": "@tbrpc/types",
+  "private": true,
+  "version": "0.0.1",
+  "author": "honzakubita",
+  "license": "ISC",
+  "type": "module",
+  "module": "index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}
