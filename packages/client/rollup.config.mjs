@@ -1,9 +1,8 @@
 import path from "path";
-import typescript from "@rollup/plugin-typescript";
-import resolve from "@rollup/plugin-node-resolve";
-import del from 'rollup-plugin-delete'
+import nodeResolve from "@rollup/plugin-node-resolve";
+import esbuild from 'rollup-plugin-esbuild'
 import dotenv from "rollup-plugin-dotenv"
-import { dts } from "rollup-plugin-dts";
+import dts from "rollup-plugin-dts";
 
 import pkg from "./package.json" with { type: "json" };
 
@@ -28,10 +27,10 @@ const external = [
   ...Object.keys(pkg.peerDependencies || {}),
 ];
 
-const bundleConfigs = [];
+const bundlesConfig = [];
 
 bundles.forEach((bundle, index) => {
-  bundleConfigs.push({
+  bundlesConfig.push({
     input: bundle.input,
     output: {
       file: bundle.outputFile, // Output file for ESM
@@ -39,51 +38,51 @@ bundles.forEach((bundle, index) => {
       sourcemap: true,
     },
     plugins: [
-      index == 0 &&
-        del({
-          targets: "dist/*",
-          verbose: true,
-        }),
-      resolve(),
-      typescript({
-        tsconfig: "../../tsconfig.json",
-        declaration: index == 0, // Only generate declarations once
-        declarationDir: path.dirname(bundle.outputFile),
+      nodeResolve({
+        extensions: [".mjs", ".js", ".json", ".node", ".ts", ".tsx"],
+      }),
+      esbuild({
+        include: [
+          "src/**/*.{ts,tsx,js,jsx}",
+          // Include workspace sources:
+          "../**/src/**/*.{ts,tsx,js,jsx}",
+          "../../packages/**/src/**/*.{ts,tsx,js,jsx}",
+        ],
+        sourceMap: true,
+        target: "es2019",
+        tsconfig: "./tsconfig.json",
       }),
     ],
     external,
   });
 
   // Dotenv injection for each bundle
-  bundleConfigs.push({
+  bundlesConfig.push({
     input: bundle.outputFile,
     output: {
       dir: path.dirname(bundle.outputFile),
     },
-    plugins: [
-      dotenv()
-    ],
+    plugins: [dotenv()],
     external,
   });
 });
 
 const typesBundleConfig = {
-  input: pkg.module,
+  input: input,
   output: {
-    file: "dist/index.d.ts", // Output file for the declaration file
+    file: pkg.types,
     format: "esm",
   },
   plugins: [
-    dts({
-      include: ['src'],
+    nodeResolve({
+      extensions: [".mjs", ".js", ".json", ".node", ".ts", ".tsx"],
     }),
-    del({
-      targets: "dist/esm/**/*.d.ts",
-      verbose: true,
-      hook: "buildEnd",
-    }),
+    dts(),
   ],
   external,
 };
 
-export default [...bundleConfigs, typesBundleConfig];
+export default [
+  ...bundlesConfig, 
+  typesBundleConfig
+];

@@ -11,13 +11,6 @@
     "allowImportingTsExtensions": false,
     "isolatedModules": true,
     "moduleDetection": "force",
-    "noEmit": true,
-
-    /* Build */
-    "declaration": true,
-    "declarationDir": "./dist/esm",
-    "sourceMap": true,
-    "rootDir": ".",
 
     "strict": true,
   },
