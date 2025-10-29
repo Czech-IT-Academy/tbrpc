@@ -1,27 +1,35 @@
 import { baseRouter, baseRouteCaller, type RouterOptions } from "tbrpc-base";
 import { type WebSocketServer, WebSocket } from "ws";
+import http from "http";
 
 type Tail<T extends any[]> = T extends [any, ...infer R] ? R : never;
+
+export type ServerRouteContext<ClientOptions extends RouterOptions> = {
+  ws: WebSocket;
+  client: ReturnType<typeof baseRouteCaller<ClientOptions>>;
+  clients: Map<WebSocket, ReturnType<typeof baseRouteCaller<ClientOptions>>>;
+};
+
+export type ClientRouteCaller<ClientOptions extends RouterOptions> = ReturnType<
+  typeof baseRouteCaller<ClientOptions>
+>;
 
 export type ServerRouterOptions<ClientOptions extends RouterOptions> = {
   routes: {
     [key: string]: (
-      context: {
-        ws: WebSocket;
-        client: ReturnType<typeof baseRouteCaller<ClientOptions>>;
-        clients: Map<
-          WebSocket,
-          ReturnType<typeof baseRouteCaller<ClientOptions>>
-        >;
-      },
+      context: ServerRouteContext<ClientOptions>,
       ...args: any[]
     ) => any;
   };
   onClientConnect?: (
     ws: WebSocket,
-    clientRouteCaller: ReturnType<typeof baseRouteCaller<ClientOptions>>
+    request: http.IncomingMessage,
+    clientRouteCaller: ClientRouteCaller<ClientOptions>
   ) => void;
-  onClientDisconnect?: (ws: WebSocket) => void;
+  onClientDisconnect?: (
+    ws: WebSocket,
+    clientRouteCaller: ClientRouteCaller<ClientOptions>
+  ) => void;
 };
 
 export function createServerRouter<ClientOptions extends RouterOptions>() {
@@ -36,12 +44,9 @@ function _serverRouter<
   ClientOptions extends RouterOptions,
   Options extends ServerRouterOptions<ClientOptions>
 >(wsServer: WebSocketServer, options: Options) {
-  const clients = new Map<
-    WebSocket,
-    ReturnType<typeof baseRouteCaller<Options>>
-  >();
+  const clients = new Map<WebSocket, ClientRouteCaller<ClientOptions>>();
 
-  wsServer.on("connection", (ws) => {
+  wsServer.on("connection", (ws, request) => {
     // Create a client route caller for this connection
     const websocketSend = (data: string) => {
       if (ws.readyState !== WebSocket.OPEN) {
@@ -64,7 +69,7 @@ function _serverRouter<
     );
 
     // Call the onClientConnect callback if provided
-    options.onClientConnect?.(ws, clientRouteCaller);
+    options.onClientConnect?.(ws, request, clientRouteCaller);
 
     // Add new client to the clients map
     clients.set(ws, clientRouteCaller);
@@ -72,7 +77,7 @@ function _serverRouter<
     // Handle client disconnection
     ws.on("close", () => {
       clients.delete(ws);
-      options.onClientDisconnect?.(ws);
+      options.onClientDisconnect?.(ws, clientRouteCaller);
     });
 
     // Remap route handlers to strap the websocket as the first argument and provide this argument by creating a wrapper
@@ -86,7 +91,6 @@ function _serverRouter<
               client: clientRouteCaller,
               clients,
             },
-            clientRouteCaller,
             ...args
           ),
       ])
